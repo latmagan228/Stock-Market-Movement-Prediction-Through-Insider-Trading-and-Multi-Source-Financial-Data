@@ -30,6 +30,6 @@ Predecir el movimiento del precio de una acción (subida/bajada) en un horizonte
 | `market_cap` | Float | Capitalización de mercado en el momento de la transacción |
 
 ## Pasos Siguientes
-1. **Limpieza de Datos**: Estandarizar nombres, filtrar transacciones irrelevantes.
+1. **Limpieza de Datos**: Implementado en **[01_data_cleaning.ipynb](01_data_cleaning.ipynb)** (Estandarización de nombres, filtrado de transacciones irrelevantes).
 2. **Feature Engineering**: Calcular `pct_change_holdings`, agregar datos históricos de precios para calcular los returns.
 3. **Enriquecimiento**: Cruzar con datos fundamentales (Sector, Market Cap).

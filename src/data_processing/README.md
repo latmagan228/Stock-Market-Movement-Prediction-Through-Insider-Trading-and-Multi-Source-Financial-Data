@@ -10,6 +10,7 @@ This module aims to transform raw insider trading data into a structured dataset
 ## 📄 Dataset Design
 Refer to **[dataset_design.md](dataset_design.md)** for the detailed schema specification of the final dataset.
 
-## 🔄 Workflow (Planned)
+## 🔄 Workflow
+1. **[01_data_cleaning.ipynb](01_data_cleaning.ipynb)**: Notebook for interactive data cleaning and feature engineering.
 - **Input**: Raw data from `data/raw/`
 - **Output**: Processed dataset in `data/processed/`
