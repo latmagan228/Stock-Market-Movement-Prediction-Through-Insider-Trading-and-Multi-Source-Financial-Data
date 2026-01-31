@@ -47,13 +47,40 @@ openinsiderData/
     pip install -r requirements.txt
     ```
 
+4.  Configure Tiingo API:
+    # Edit .env and add your Tiingo API key
+
+    Get your free API key at [tiingo.com](https://www.tiingo.com)
+    
+    Tiingo is used for historical stock prices only.
+
 ### 2. Usage
 
-Run the data collector (scraper) to populate your raw dataset:
+#### Step 1: Collect Insider Trading Data
+
+**Data Collection Parameters:**
+- **Time Range**: 2018-2025 (8 years of historical data)
+- **Transaction Type**: Purchases only (insider buying signals)
+- **Quality Filter**: Minimum $50,000 transaction value
+  - Eliminates ~51% noise (small/automatic transactions)
+  - Keeps ~41,000 high-quality transactions
+
+Run the data collector:
 
 ```bash
 python src/data_collection/scraper.py
 ```
+
+#### Step 2: Process and Enrich Data
+Open the Jupyter notebooks in `src/data_processing/` (execute in order):
+1. **01_data_cleaning.ipynb**: Clean and engineer base features from insider data
+2. **02_tiingo_integration.ipynb**: Fetch market data and calculate target returns (1w, 1m, 3m)
+3. **03_feature_engineering.ipynb**: Add advanced features (insider track record, cluster quality, etc.)
+
+**Expected Output:**
+- **45,242 transactions** with 19 features
+- **90% coverage** for target returns
+- **Average returns**: +1.1% (1w), +2.0% (1m), +30.7% (3m)
 
 *For detailed instructions on each module, please refer to their respective READMEs linking in the Project Structure section above.*
 
@@ -61,22 +88,6 @@ python src/data_collection/scraper.py
 
 Global settings (scraping speed, filters, paths) are managed in:
 `config/config.yaml`
-
-
-## 💼 Transaction Types
-
-Available transaction types:
-- P - Purchase
-- S - Sale
-- F - Tax
-- D - Disposition
-- G - Gift
-- X - Exercise
-- M - Options Exercise
-- C - Conversion
-- W - Will/Inheritance
-- H - Holdings
-- O - Other
 
 ## 🔍 Troubleshooting
 

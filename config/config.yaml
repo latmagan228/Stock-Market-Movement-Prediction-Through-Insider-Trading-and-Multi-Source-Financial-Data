@@ -6,19 +6,22 @@ output:
 
 # Scraping Settings
 scraping:
-  start_year: 2025  # From which year should data be retrieved
+  start_year: 2018  # From which year should data be retrieved (8 years of data: 2018-2025)
   start_month: 1    # From which month in start_year
   max_workers: 5   # Number of parallel downloads
   retry_attempts: 3 # Number of retry attempts on errors
   timeout: 30       # Timeout in seconds for HTTP requests
 
-# Filter Settings
+# Filter Settings (Data Quality)
 filters:
-  min_transaction_value: 0     # Minimum transaction value in USD
-  transaction_types: ["P"]         # Empty = all types, or list: ["P", "S", "A", etc.]
+  min_transaction_value: 50000 # Minimum transaction value in USD ($50k threshold)
+                               # Eliminates ~51% of small/automatic transactions (noise)
+                               # Keeps ~41,000 high-quality transactions (2018-2025)
+                               # Analysis: see analyze_transaction_values.py
+  transaction_types: ["P"]     # P = Purchase only (S = Sale, A = Award, etc.)
   exclude_companies: []        # List of ticker symbols to exclude
   include_companies: []        # List of ticker symbols to include
-  min_shares_traded: 0        # Minimum number of traded shares
+  min_shares_traded: 0         # Minimum number of traded shares
 
 # Logging Settings
 logging:
