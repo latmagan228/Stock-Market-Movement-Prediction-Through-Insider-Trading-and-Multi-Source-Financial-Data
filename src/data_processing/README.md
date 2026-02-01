@@ -27,7 +27,7 @@ Refer to **[dataset_design.md](dataset_design.md)** for the detailed schema spec
 3. **[03_feature_engineering.ipynb](03_feature_engineering.ipynb)**: Advanced feature engineering.
    - **Input**: `data/processed/insider_trades_with_targets.parquet`
    - **Output**: `data/processed/insider_trades_final.parquet`
-   - **Features added** (high-importance only):
+   - **Features added**:
      - `insider_id`: Unique identifier (ticker + role)
      - `insider_trade_count`: Insider's track record (# previous trades)
      - `days_since_last_trade`: Trading frequency indicator
@@ -36,7 +36,21 @@ Refer to **[dataset_design.md](dataset_design.md)** for the detailed schema spec
    - **⚡ Fast**: < 1 minute (local calculations only)
    - **Final dataset**: 45,242 records × 19 columns
 
-4. **Calculate Targets**: Use notebook 02 to calculate returns for all data after enrichment.
+4. **[04_advanced_features.ipynb](04_advanced_features.ipynb)**: Market-corrected alpha & optimization
+   - **Input**: `data/processed/insider_trades_final.parquet`
+   - **Output**: `data/processed/insider_trades_ml_ready.parquet` (ML-ready)
+   - **Data Sources**:
+     - **Tiingo**: Benchmarks (SPY/IWM/IWV) + features técnicas (aprovecha caché)
+     - **yfinance**: market_cap, sector (Tiingo no los provee en API básica)
+   - **Features added** (12 new):
+     - **Alpha Targets**: `alpha_1w`, `alpha_1m`, `alpha_3m`, `benchmark_used`
+     - **Fundamentals**: `sector`, `log_market_cap`
+     - **Technicals**: `price_range_position` (fusiona 52w_high/low), `volatility_30d`
+     - **Refined**: `role_bucket`, `log_transaction_value`
+   - **Features removed** (7 redundant): `insider_role`, `transaction_value`, `market_cap`, `is_c_level`, `trade_date`, `price_vs_52w_high`, `price_vs_52w_low`
+   - **Final dataset**: 45,242 records × **25 columns** (optimized, no redundancy)
+
+5. **Calculate Targets**: Use notebook 02 to calculate returns for all data after enrichment.
 
 ## 📦 Tiingo Integration
 

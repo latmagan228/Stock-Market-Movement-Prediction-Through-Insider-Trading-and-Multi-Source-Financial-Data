@@ -76,11 +76,13 @@ Open the Jupyter notebooks in `src/data_processing/` (execute in order):
 1. **01_data_cleaning.ipynb**: Clean and engineer base features from insider data
 2. **02_tiingo_integration.ipynb**: Fetch market data and calculate target returns (1w, 1m, 3m)
 3. **03_feature_engineering.ipynb**: Add advanced features (insider track record, cluster quality, etc.)
+4. **04_advanced_features.ipynb**:  Market-corrected alpha & optimization
+   - Corrects market bias using hybrid benchmarks (SPY/IWM/IWV via Tiingo)
+   - Adds fundamental data (market_cap, sector) via yfinance
 
 **Expected Output:**
-- **45,242 transactions** with 19 features
-- **90% coverage** for target returns
-- **Average returns**: +1.1% (1w), +2.0% (1m), +30.7% (3m)
+- **45,242 transactions** with **25 features** (optimized, no redundancy)
+- **ML-ready dataset**: `insider_trades_ml_ready.parquet`
 
 *For detailed instructions on each module, please refer to their respective READMEs linking in the Project Structure section above.*
 
