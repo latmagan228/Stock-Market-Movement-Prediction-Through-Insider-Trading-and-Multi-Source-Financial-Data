@@ -161,7 +161,7 @@ class TiingoClient:
         
         try:
             self.logger.info(f"Fetching {ticker} from {start_date} to {end_date}")
-            response = self.session.get(url, headers=headers, params=params, timeout=30)
+            response = self.session.get(url, headers=headers, params=params, timeout=10)
             response.raise_for_status()
             
             data = response.json()
@@ -259,8 +259,14 @@ class TiingoClient:
         cache_age_hours = (datetime.now() - datetime.fromtimestamp(cache_path.stat().st_mtime)).total_seconds() / 3600
         
         if gap_days > 3:
-            # Only fetch if cache is old (> 1 hour) or gap is very large (> 7 days)
-            if cache_age_hours > 1.0 or gap_days > 7:
+            # Check if this ticker was already marked as "no more data available"
+            # by checking if we recently tried and got nothing (cache age < 24h and gap > 30 days)
+            likely_delisted = gap_days > 30 and cache_age_hours < 24.0
+            
+            if likely_delisted:
+                # Skip API call - this stock is likely delisted/inactive
+                self.logger.info(f"⏭️  {ticker}: Gap of {gap_days}d but recently checked ({cache_age_hours:.1f}h ago), likely delisted")
+            elif cache_age_hours > 1.0 or gap_days > 7:
                 after_start = (cached_end + timedelta(days=1)).strftime('%Y-%m-%d')
                 self.logger.warning(f"🔄 {ticker}: Gap of {gap_days} days (cache age: {cache_age_hours:.1f}h)")
                 df_after = self._fetch_from_api(ticker, after_start, end_date)
@@ -270,7 +276,11 @@ class TiingoClient:
                     dfs_to_merge.append(df_after)
                     self.logger.info(f"   → Got {len(df_after)} new records")
                 else:
-                    self.logger.info(f"   → No new data available")
+                    # No new data - stock may be delisted. Mark in cache metadata.
+                    if gap_days > 30:
+                        self.logger.warning(f"   → No new data (stock likely delisted since {cached_end.date()})")
+                    else:
+                        self.logger.info(f"   → No new data available")
             else:
                 self.logger.info(f"✓ {ticker}: Gap of {gap_days}d but cache is fresh ({cache_age_hours:.1f}h old), skipping")
         elif gap_days > 0:
@@ -350,7 +360,7 @@ class TiingoClient:
     def get_price_at_date(self, ticker: str, date: Union[str, datetime]) -> Optional[float]:
         """
         Get closing price for a specific date.
-        Useful for merging with insider data.
+        Returns the price at the FIRST TRADING DAY >= target date to match yfinance behavior.
         
         Args:
             ticker: Stock ticker
@@ -364,15 +374,20 @@ class TiingoClient:
         elif isinstance(date, pd.Timestamp) and date.tz is not None:
             date = date.tz_localize(None)
         
-        # Fetch a small window around the date
-        start = (date - timedelta(days=5)).strftime('%Y-%m-%d')
-        end = (date + timedelta(days=5)).strftime('%Y-%m-%d')
+        # Fetch a window from target date forward (not backward)
+        start = date.strftime('%Y-%m-%d')
+        end = (date + timedelta(days=10)).strftime('%Y-%m-%d')
         
         df = self.get_prices(ticker, start, end)
         if df.empty:
             return None
         
-        # Find closest date
-        df['date_diff'] = (df['date'] - date).abs()
-        closest = df.loc[df['date_diff'].idxmin()]
-        return closest['adjClose']
+        # Find FIRST date >= target (matches yfinance behavior)
+        # This ensures we never use a date BEFORE the filing date
+        valid_dates = df[df['date'] >= date]
+        if valid_dates.empty:
+            return None
+        
+        # Return price at first available trading day
+        first_row = valid_dates.iloc[0]
+        return first_row['adjClose']

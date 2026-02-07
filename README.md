@@ -74,15 +74,19 @@ python src/data_collection/scraper.py
 #### Step 2: Process and Enrich Data
 Open the Jupyter notebooks in `src/data_processing/` (execute in order):
 1. **01_data_cleaning.ipynb**: Clean and engineer base features from insider data
-2. **02_tiingo_integration.ipynb**: Fetch market data and calculate target returns (1w, 1m, 3m)
-3. **03_feature_engineering.ipynb**: Add advanced features (insider track record, cluster quality, etc.)
-4. **04_advanced_features.ipynb**:  Market-corrected alpha & optimization
-   - Corrects market bias using hybrid benchmarks (SPY/IWM/IWV via Tiingo)
-   - Adds fundamental data (market_cap, sector) via yfinance
+2. **02_tiingo_integration.ipynb**: Fetch market data, calculate returns, and diagnose ticker quality
+3. **03_feature_engineering.ipynb**: Complete feature engineering 
+   - Basic features: insider track record, cluster quality, trading frequency
+   - Alpha targets: Market-corrected alpha (SPY/IWM/IWV benchmarks via Tiingo)
+   - Fundamental data: market_cap, sector via yfinance
+   - Technical features: price_range_position, volatility_30d
+   - Outlier capping: Returns -100%/+300%, Alpha -150%/+300%
 
 **Expected Output:**
-- **45,242 transactions** with **25 features** (optimized, no redundancy)
-- **ML-ready dataset**: `insider_trades_ml_ready.parquet`
+- **42,015 transactions** with **23 features** (optimized, no redundancy)
+- **Benchmark distribution**: IWM 67%, IWV 21.3%, SPY 11.6%
+- **ML-ready dataset**: `insider_trades_ml_ready.parquet` (3.95 MB)
+- **Tiingo cache**: 5,063 tickers, 530 MB
 
 *For detailed instructions on each module, please refer to their respective READMEs linking in the Project Structure section above.*
 
