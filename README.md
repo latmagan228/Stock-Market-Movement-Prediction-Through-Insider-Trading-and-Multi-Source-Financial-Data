@@ -18,11 +18,13 @@ openinsiderData/
 ├── config/                 # Global configuration files
 ├── data/
 │   ├── raw/               # Scraped data storage
-│   └── processed/         # Feature-engineered training data
+│   ├── processed/         # Feature-engineered training data
+│   └── tiingo_cache/      # Cached market data from Tiingo API
 ├── src/
 │   ├── data_collection/    # Scraper source code
-│   ├── data_processing/    # ETL and Feature Engineering pipeline
-│   └── models/             # Machine Learning models
+│   ├── data_processing/    # ETL, Feature Engineering & Visualizations
+│   │   └── visualizations/ # Paper visualizations and backtest analysis
+│   └── models/             # Machine Learning models and saved artifacts
 └── venv/                   # Python Virtual Environment
 ```
 
@@ -88,7 +90,24 @@ Open the Jupyter notebooks in `src/data_processing/` (execute in order):
 - **ML-ready dataset**: `insider_trades_ml_ready.parquet` (3.95 MB)
 - **Tiingo cache**: 5,063 tickers, 530 MB
 
-*For detailed instructions on each module, please refer to their respective READMEs linking in the Project Structure section above.*
+#### Step 3: Train Machine Learning Models
+Open `src/models/model_training.ipynb` to:
+1. **Split data**: Train on 2018-2023 (~35K samples), test on 2024+ (7,773 trades)
+2. **Train three models**: LightGBM, XGBoost, and CatBoost with Optuna hyperparameter optimization
+3. **Evaluate performance**: ROC-AUC, precision-recall curves, calibration analysis
+4. **Save artifacts**: Best model, feature configuration, and probability predictions
+
+**Model Configuration:**
+- **Target**: Binary classification (alpha_3m > 5%)
+- **Optimization**: 50 Optuna trials maximizing ROC-AUC
+- **Features**: 13 numerical + 1 categorical (sector)
+- **Output**: Trained models in `src/models/saved_models/`
+
+#### Step 4: Generate Paper Visualizations
+Open `src/data_processing/visualizations/paper_visualizations.ipynb` for thesis-ready outputs:
+
+
+*For detailed instructions on each module, please refer to their respective READMEs linked in the Project Structure section above.*
 
 ## ⚙️ Configuration
 

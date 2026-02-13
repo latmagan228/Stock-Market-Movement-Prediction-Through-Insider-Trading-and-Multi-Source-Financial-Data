@@ -48,10 +48,37 @@ Refer to **[dataset_design.md](dataset_design.md)** for the detailed schema spec
    - **⚡ Fast**: < 2 minutes (local calculations + yfinance)
    - **Final dataset**: 42,015 records × **23 columns** (optimized)
 
+4. **[visualizations/paper_visualizations.ipynb](visualizations/paper_visualizations.ipynb)**: Academic paper visualizations and backtest analysis
+   - **Input**: `data/processed/insider_trades_ml_ready.parquet` + saved models
+   - **Paper Figures & Tables**:
+     - **Figure 2**: Correlation heatmap (features vs targets)
+     - **Figure 3**: Price range position vs alpha scatter plot with trend line
+     - **Figure 4**: Role bucket distribution (insider hierarchy)
+     - **Figure 5**: Return vs Alpha distribution comparison (2×3 histogram grid)
+     - **Figure 6**: Sector distribution bar chart
+     - **Table 1**: Complete feature list with coverage percentages
+     - **Table 2**: Return vs Alpha statistics by horizon
+     - **Table 3**: Model performance comparison (LightGBM, XGBoost, CatBoost)
+   - **Backtest Analysis** (Calendar-Time Portfolio methodology):
+     - **Figure 7**: CTP cumulative net return curves by threshold
+     - **Figure 8**: Drawdown underwater plot
+     - Trade-level signal quality analysis
+     - Position sizing comparison (equal-weight, prob-weighted, vol-scaled)
+     - Walk-forward quarterly evaluation with dual bar charts
+     - Sensitivity analysis heatmaps (threshold × max positions)
+     - Diagnostic analysis (Figure 5 vs backtest discrepancy explanation)
+   - **Key Results**:
+     - Baseline (all trades): -2.1% cumulative return
+     - Model @ 0.5 threshold: +12.3% cumulative, Sharpe 1.98
+     - Model @ 0.6 threshold: +47.4% cumulative, Sharpe 5.14
+     - Realistic transaction costs: 10 bps round-trip + 5 bps slippage
+     - 13-week holding period matching prediction target
+
 ## 📦 Tiingo Integration
 
 The module uses `tiingo_client.py` for intelligent data fetching:
 - **Persistent cache**: Data stored in `data/tiingo_cache/` (Parquet format)
 - **Incremental updates**: Only fetches missing date ranges
 - **Rate limiting**: Respects API limits (configurable)
-- **Retry logic**: Automatic retries with exponential backoff- **Delisted detection**: Skips API calls for likely delisted stocks (gap > 30 days)
+- **Retry logic**: Automatic retries with exponential backoff
+- **Delisted detection**: Skips API calls for likely delisted stocks (gap > 30 days)
