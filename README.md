@@ -92,15 +92,19 @@ Open the Jupyter notebooks in `src/data_processing/` (execute in order):
 
 #### Step 3: Train Machine Learning Models
 Open `src/models/model_training.ipynb` to:
-1. **Split data**: Train on 2018-2023 (~35K samples), test on 2024+ (7,773 trades)
-2. **Train three models**: LightGBM, XGBoost, and CatBoost with Optuna hyperparameter optimization
-3. **Evaluate performance**: ROC-AUC, precision-recall curves, calibration analysis
-4. **Save artifacts**: Best model, feature configuration, and probability predictions
+1. **Select horizon**: Set `ACTIVE_HORIZON` to `alpha_1w`, `alpha_1m`, or `alpha_3m`
+2. **Train three models**: LightGBM, XGBoost, and CatBoost with pre-tuned optimal hyperparameters
+3. **Evaluate performance**: ROC-AUC, precision-recall curves, calibration, backtest
+4. **Save artifacts**: Trained models, feature config, and label encoder
 
-**Model Configuration:**
-- **Target**: Binary classification (alpha_3m > 5%)
-- **Optimization**: 50 Optuna trials maximizing ROC-AUC
-- **Features**: 13 numerical + 1 categorical (sector)
+**Multi-Horizon Results:**
+| Horizon | Target | Threshold | Best Model | ROC-AUC |
+|---------|--------|-----------|------------|--------|
+| 1 week  | `alpha_1w` | 2% | CatBoost | 0.6110 |
+| 1 month | `alpha_1m` | 3% | CatBoost | 0.5695 |
+| 3 months| `alpha_3m` | 5% | LightGBM | 0.5640 |
+
+- **Features**: 12 numerical + 1 categorical (sector)
 - **Output**: Trained models in `src/models/saved_models/`
 
 #### Step 4: Generate Paper Visualizations

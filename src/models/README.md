@@ -9,13 +9,19 @@ This directory contains the Machine Learning models for predicting stock alpha b
 2. **Low signal-to-noise ratio** in financial data
 3. **Random market movements** dominating short-term returns
 
-**Classification Strategy:** Predict whether a trade will generate "High Alpha" (>5%) or should be skipped.
+**Classification Strategy:** Predict whether a trade will generate alpha above a given threshold, or should be skipped.
 
-## 📊 Model Architecture
+## 📊 Multi-Horizon Results
 
-### Target Variable
-- **Binary classification**: `alpha_3m > 5%` → Class 1 ("High Alpha")
-- **Class distribution**: ~37% positive, ~63% negative
+Best hyperparameters were found via Optuna (50 trials, 3-fold TimeSeriesSplit CV) and are hardcoded in `model_training.ipynb` for reproducibility.
+
+| Horizon | Target | Threshold | Best Model | Test ROC-AUC |
+|---------|--------|-----------|------------|--------------|
+| 1 week  | `alpha_1w` | 2% | CatBoost | **0.6110** |
+| 1 month | `alpha_1m` | 3% | CatBoost | **0.5695** |
+| 3 months| `alpha_3m` | 5% | LightGBM | **0.5640** |
+
+Switch horizons by changing `ACTIVE_HORIZON` in the notebook's config cell.
 
 ### Features (13 total)
 | Category | Features |
@@ -27,16 +33,15 @@ This directory contains the Machine Learning models for predicting stock alpha b
 | Fundamental | `log_market_cap`, `sector` |
 | Technical | `price_range_position`, `volatility_30d` |
 
-### Models Implemented
-1. **XGBoost Classifier** - Gradient boosting with Optuna hyperparameter tuning
-2. **CatBoost Classifier** - Native categorical handling for sector feature
-3. **LightGBM Classifier** - Fast training with balanced class weights
+### Models Trained
+1. **XGBoost Classifier** — Gradient boosting
+2. **CatBoost Classifier** — Native categorical handling for sector
+3. **LightGBM Classifier** — Fast training with balanced class weights
 
 ### Validation Strategy
 - **Temporal split** (NOT random) to prevent look-ahead bias
-- **Train**: 2018-2023 (~36,000 samples)
-- **Test**: 2024+ (~6,000 samples)
-- **Cross-validation**: TimeSeriesSplit (3 folds) during Optuna tuning
+- **Train**: 2018-2023 (~31,600 samples)
+- **Test**: 2024+ (~7,700 samples)
 
 ## 📥 Input Data
 
@@ -50,16 +55,36 @@ This directory contains the Machine Learning models for predicting stock alpha b
 |------|-------------|
 | `saved_models/xgb_classifier.joblib` | Trained XGBoost model |
 | `saved_models/catboost_classifier.joblib` | Trained CatBoost model |
-| `saved_models/lgb_classifier.joblib` | Trained LightGBM model |
+| `saved_models/lgb_classifier.joblib` | Trained LightGBM model (production best) |
 | `saved_models/sector_label_encoder.joblib` | Label encoder for sector |
-| `saved_models/feature_config.json` | Feature configuration |
+| `saved_models/feature_config.json` | Feature schema, horizon & threshold metadata |
 
 ## 📈 Evaluation Metrics
 
 | Metric | Purpose |
 |--------|----------|
-| **ROC-AUC** | Primary metric - ranking ability |
+| **ROC-AUC** | Primary metric — ranking ability |
 | **Average Precision** | Precision-recall trade-off |
 | **Alpha by Probability Decile** | Does high probability → high alpha? |
 | **Backtest Returns** | Simulated trading strategy performance |
+
+## 🏭 Production Model
+
+**Horizon**: alpha_3m (3-month market-corrected alpha > 5%)  
+**Best model**: LightGBM (ROC-AUC 0.5633)  
+**Use case**: Real-time monitoring system to identify promising insider trading opportunities
+
+## 📁 Directory Structure
+
+```
+src/models/
+├── model_training.ipynb          # Train all 3 models with best hyperparameters
+├── README.md                     # This file
+└── saved_models/
+    ├── xgb_classifier.joblib     # Trained XGBoost (alpha_3m)
+    ├── lgb_classifier.joblib     # Trained LightGBM (alpha_3m) ← production
+    ├── catboost_classifier.joblib# Trained CatBoost (alpha_3m)
+    ├── sector_label_encoder.joblib
+    └── feature_config.json       # Feature schema + target config
+```
 
